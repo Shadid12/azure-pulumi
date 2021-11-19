@@ -1,7 +1,7 @@
 const faunadb = require('faunadb')
 const q = faunadb.query
 
-var serverClient = new faunadb.Client({ secret: 'fnAEYWP9_zACT50HdgUEvPYiDGv7yoteGaAkhHhQ' })
+const serverClient = new faunadb.Client({ secret: process.env["FAUNA_SECRET"] })
 
 module.exports = async function (context, req) {
     if (req.query.id) {
@@ -10,7 +10,6 @@ module.exports = async function (context, req) {
             const res = await serverClient.query(
                 q.Get(q.Ref(q.Collection('Book'), id))
             )
-            console.log('WHEREEE', res);
             context.res = {
                 body: { book: res.data },
                 headers: {
@@ -24,7 +23,6 @@ module.exports = async function (context, req) {
             };
         }
     }
-
     
     else {
         context.res = {

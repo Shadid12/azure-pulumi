@@ -1,12 +1,32 @@
 // Copyright 2016-2021, Pulumi Corporation.  All rights reserved.
 
 import * as pulumi from "@pulumi/pulumi";
-
 import * as resources from "@pulumi/azure-native/resources";
 import * as storage from "@pulumi/azure-native/storage";
 import * as web from "@pulumi/azure-native/web";
-
+import { Index, Collection } from "fauna-pulumi-provider";
 import { getConnectionString, signedBlobReadUrl } from "./helpers";
+
+
+// Create a collection
+export const myBookCollection = new Collection('Store')
+
+export const index = new Index(
+    'book_by_author',
+    {
+      source: myBookCollection.name,
+      terms: [
+        {
+          field: ['data', 'author'],
+        },
+      ],
+    },
+    {
+      // Index will fail to create if collection doesen't already exist
+      dependsOn: [myBookCollection],
+    }
+  )
+
 
 // Create a separate resource group for this example.
 const resourceGroup = new resources.ResourceGroup("functions-rg");
@@ -60,6 +80,7 @@ const app = new web.WebApp("fa", {
             { name: "FUNCTIONS_WORKER_RUNTIME", value: "node" },
             { name: "WEBSITE_NODE_DEFAULT_VERSION", value: "~14" },
             { name: "WEBSITE_RUN_FROM_PACKAGE", value: codeBlobUrl },
+            { name: "FAUNA_SECRET", value: process.env.FAUNA_SERVER_KEY }
         ],
         http20Enabled: true,
         nodeVersion: "~14",
