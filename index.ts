@@ -9,7 +9,7 @@ import { getConnectionString, signedBlobReadUrl } from "./helpers";
 
 
 // Create a collection
-export const myBookCollection = new Collection('Store')
+export const myBookCollection = new Collection('Book2')
 
 export const index = new Index(
     'book_by_author',
